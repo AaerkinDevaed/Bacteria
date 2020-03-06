@@ -7,7 +7,6 @@ Created on %(date)s
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import scipy.stats as sp
 from scipy.optimize import curve_fit
 
 
