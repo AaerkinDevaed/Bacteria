@@ -8,25 +8,28 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
+from scipy.integrate import odeint
 
 
-def bacteria(num_bacteria_and_nutrient, g_max, K_const, a_const, Mu_const):  # the differential equations for the model
-
-    dndt = [
+def bacteria(num_bacteria_and_nutrient, t, g_max, K_const, a_const, Mu_const):  # the differential equations for the model
+    
+        dndt = [
         num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] / (num_bacteria_and_nutrient[1] + K_const) -
         num_bacteria_and_nutrient[0] * Mu_const,
-        -a_const * num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] / (
-                    num_bacteria_and_nutrient[1] + K_const)]  # differential equations
+        -1 / a_const * num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] /
+                     (num_bacteria_and_nutrient[1] + K_const)]  # differential equations
 
-    return dndt  # return differential equation
+        return dndt  # return differential equation
 
+def bacteriaplot(t, g_max, K_const, a_const, Mu_const):
+    return (odeint(bacteria, init_val, t, args=(g_max, K_const, a_const, Mu_const)))
 
 df = pd.read_excel(r'D:\newDownload\Bacteria_data.xlsx', sheet_name='Sheet1')
 data = df.values
 t = data[:, 0]
 
 
-##LogFit to find mu 
+##LogFit to find mu
 HighBactData = np.log(data[31:])
 
 t2 = t[31:]
@@ -36,7 +39,7 @@ a2, mu_guess = (np.linalg.lstsq(t2, HighBactData[:, 1], rcond=None)[0])
 logfitfor_mu = [a2 + mu_guess * i for i in data[32:, 0]]
 exp_fit_for_mu = np.exp(logfitfor_mu)
 
-###rofactor 
+###rofactor
 a_guess = np.amax(data) / 0.2
 nutrient_amount = [0.2 - i / a_guess for i in data[0:52, 1]]
 for i in np.arange(42,52):
@@ -61,8 +64,12 @@ K_guess_list = [(data[i][1] * g_max_guess * nutrient_amount[i] / (data[i][1] * m
 
 K_guess = np.average(K_guess_list)
 
+data_with_ro = np.vstack([data[:,1], nutrient_amount]).T
 
-input = np.hstack([data[1], nutrient_amount])
+init_val = [data[0][1], 0.2]
+
+b = bacteriaplot(t, g_max_guess, K_guess, a_guess, mu_guess)
+curve_fit(bacteriaplot, t, np.log(data_with_ro), p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
 
 #v, k = curve_fit(bacteria, [data[1], nutrient_amount], t, g_max_const, 1, a_guess, mu_guess)[0]
 
