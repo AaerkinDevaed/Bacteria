@@ -69,7 +69,7 @@ data_with_ro = np.vstack([data[:,1], nutrient_amount]).T
 init_val = [data[0][1], 0.2]
 
 b = bacteriaplot(t, g_max_guess, K_guess, a_guess, mu_guess)
-curve_fit(bacteriaplot, t, np.log(data_with_ro), p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
+curve_fit(bacteriaplot, t, (data_with_ro), p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
 
 #v, k = curve_fit(bacteria, [data[1], nutrient_amount], t, g_max_const, 1, a_guess, mu_guess)[0]
 
