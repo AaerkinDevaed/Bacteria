@@ -16,13 +16,17 @@ def bacteria(num_bacteria_and_nutrient, t, g_max, K_const, a_const, Mu_const):  
         dndt = [
         num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] / (num_bacteria_and_nutrient[1] + K_const) -
         num_bacteria_and_nutrient[0] * Mu_const,
-        -1 / a_const * num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] /
+        -1 * a_const * num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] /
                      (num_bacteria_and_nutrient[1] + K_const)]  # differential equations
 
         return dndt  # return differential equation
 
 def bacteriaplot(t, g_max, K_const, a_const, Mu_const):
-    return (odeint(bacteria, init_val, t, args=(g_max, K_const, a_const, Mu_const)))
+    b = ((odeint(bacteria, init_val, t, args=(g_max, K_const, a_const, Mu_const)))).flatten()
+    for i,x in enumerate(b):
+        if x<=0:
+            b[i]=0.0001
+    return np.log(b)
 
 df = pd.read_excel(r'D:\newDownload\Bacteria_data.xlsx', sheet_name='Sheet1')
 data = df.values
@@ -43,7 +47,7 @@ exp_fit_for_mu = np.exp(logfitfor_mu)
 a_guess = np.amax(data) / 0.2
 nutrient_amount = [0.2 - i / a_guess for i in data[0:52, 1]]
 for i in np.arange(42,52):
-    nutrient_amount[i] = 0
+    nutrient_amount[i] = 0.0000001
 
 #####LogFit to find gmax
 low_bact_data = np.log(data[0:29])
@@ -68,8 +72,10 @@ data_with_ro = np.vstack([data[:,1], nutrient_amount]).T
 
 init_val = [data[0][1], 0.2]
 
-b = bacteriaplot(t, g_max_guess, K_guess, a_guess, mu_guess)
-curve_fit(bacteriaplot, t, (data_with_ro), p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
+pass_data=(np.array([np.log(data_with_ro[:,0]),np.log(data_with_ro[:,1])]).T).flatten()
+
+
+res = curve_fit(bacteriaplot, t, pass_data, p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
 
 #v, k = curve_fit(bacteria, [data[1], nutrient_amount], t, g_max_const, 1, a_guess, mu_guess)[0]
 
