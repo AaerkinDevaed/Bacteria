@@ -76,13 +76,19 @@ init_val = [data[0][1], 0.2]
 pass_data=(np.array([np.log(data_with_ro[:,0]),np.log(data_with_ro[:,1])]).T).flatten()
 
 
-res = curve_fit(bacteriaplot, t, pass_data, p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
+g_final, K_final, a_final, mu_final = curve_fit(bacteriaplot, t, pass_data, p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
 
 #v, k = curve_fit(bacteria, [data[1], nutrient_amount], t, g_max_const, 1, a_guess, mu_guess)[0]
 
+res = ((odeint(bacteria, init_val, t, args=(g_final, K_final, a_final, mu_final))))
 
 
-# plt.plot(A2[:,1], y2res, 'o', label='data')
-# plt.plot(data1[:,0], data1[0:28,1], 'o', label='data')
+plt.semilogy(data[:,0], data[:,1], 'o', label='data')       #given data
+plt.semilogy(data[:,0], res[:,0], 'o', label='data')        #plot of fitted model
+
+
+plt.figure()      
+model = ((odeint(bacteria, init_val, np.arange(1,150), args=(g_final, K_final, a_final, mu_final)))) #asked for 150 hour model
+plt.semilogy(np.arange(1,150), model[:,0], 'o', label='data')
 # plt.plot(data[:,0], data[:,1], 'o', label='data')
 # plt.semilogy(data[:,0], data[:,1], 'o', label='data')
