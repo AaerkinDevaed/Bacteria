@@ -4,6 +4,7 @@ Created on %(date)s
 
 @author: %(Daniil Huryn)s
 """
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -16,14 +17,14 @@ def bacteria(num_bacteria_and_nutrient, t, g_max, K_const, a_const, Mu_const):  
         dndt = [
         num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] / (num_bacteria_and_nutrient[1] + K_const) -
         num_bacteria_and_nutrient[0] * Mu_const,
-        -1 * a_const * num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] /
+        -a_const * num_bacteria_and_nutrient[0] * g_max * num_bacteria_and_nutrient[1] /
                      (num_bacteria_and_nutrient[1] + K_const)]  # differential equations
 
         return dndt  # return differential equation
 
 def bacteriaplot(t, g_max, K_const, a_const, Mu_const):
     b = ((odeint(bacteria, init_val, t, args=(g_max, K_const, a_const, Mu_const)))).flatten()
-    for i,x in enumerate(b):
+    for i, x in enumerate(b):
         if x<=0:
             b[i]=0.0001
     return np.log(b)
@@ -44,8 +45,8 @@ logfitfor_mu = [a2 + mu_guess * i for i in data[32:, 0]]
 exp_fit_for_mu = np.exp(logfitfor_mu)
 
 ###rofactor
-a_guess = np.amax(data) / 0.2
-nutrient_amount = [0.2 - i / a_guess for i in data[0:52, 1]]
+a_guess = 0.2 / np.amax(data)
+nutrient_amount = [0.2 - i * a_guess for i in data[0:52, 1]]
 for i in np.arange(42,52):
     nutrient_amount[i] = 0.0000001
 
