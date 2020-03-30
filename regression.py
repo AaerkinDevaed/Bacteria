@@ -21,6 +21,13 @@ def bacteria(num_bacteria_and_nutrient, t, g_max, K_const, a_const, Mu_const):  
                      (num_bacteria_and_nutrient[1] + K_const)]  # differential equations
 
         return dndt  # return differential equation
+    
+def bacterialag(num_bacteria_and_nutrient, t, g_max, K_const, a_const, Mu_const):  # the differential equations for the model during lag time (only deaths)
+    
+    dndt = [ - num_bacteria_and_nutrient[0] * Mu_const,
+    0]  # differential equations
+
+    return dndt  # return differential equation
 
 def bacteriaplot(t, g_max, K_const, a_const, Mu_const):
     b = ((odeint(bacteria, init_val, t, args=(g_max, K_const, a_const, Mu_const)))).flatten()
@@ -78,17 +85,25 @@ pass_data=(np.array([np.log(data_with_ro[:,0]),np.log(data_with_ro[:,1])]).T).fl
 
 g_final, K_final, a_final, mu_final = curve_fit(bacteriaplot, t, pass_data, p0=(g_max_guess, K_guess, a_guess, mu_guess))[0]
 
-#v, k = curve_fit(bacteria, [data[1], nutrient_amount], t, g_max_const, 1, a_guess, mu_guess)[0]
+
 
 res = ((odeint(bacteria, init_val, t, args=(g_final, K_final, a_final, mu_final))))
 
 
 plt.semilogy(data[:,0], data[:,1], 'o', label='data')       #given data
-plt.semilogy(data[:,0], res[:,0], 'o', label='data')        #plot of fitted model
-
-
-plt.figure()      
-model = ((odeint(bacteria, init_val, np.arange(1,150), args=(g_final, K_final, a_final, mu_final)))) #asked for 150 hour model
-plt.semilogy(np.arange(1,150), model[:,0], 'o', label='data')
+plt.semilogy(data[:,0], res[:,0], 'o', label='fit')        #plot of fitted model
+plt.xlabel('CFU / ml')                                  #put axis titles on graph
+plt.ylabel('Time (h)')
+plt.legend(loc='best')
+plt.title('Data and Fitted model of Bacteria growth')
+plt.figure()    
+modellag = ((odeint(bacteria, init_val, np.arange(0,4.5), args=(g_final, K_final, a_final, mu_final)))) #asked for 150 hour model - lag time 
+modelgrow = ((odeint(bacteria, modellag[4], np.arange(4.50001,150), args=(g_final, K_final, a_final, mu_final)))) #asked for 150 hour model - growth time
+model = np.vstack([modellag, modelgrow])
+plt.semilogy(np.hstack([np.arange(0,4.5), np.arange(4.50001,150)]), model[:,0], 'o', label='ODEINT')
+plt.xlabel('CFU / ml')                                  #put axis titles on graph
+plt.ylabel('Time (h) (Log)')
+plt.legend(loc='best')
+plt.title('Model for 150 hours using odeint')
 # plt.plot(data[:,0], data[:,1], 'o', label='data')
 # plt.semilogy(data[:,0], data[:,1], 'o', label='data')
