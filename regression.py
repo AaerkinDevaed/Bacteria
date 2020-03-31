@@ -67,7 +67,7 @@ g_max_guess = g_max_guess - mu_guess                                       #acco
 yk = np.log(data[20:41])                                                   #middle data to find K, when rho is small but still a factor
 
 rough_deriv_bact = [(data[i+1][1]- data[i][1]) for i in np.arange(0,51)] #only correct for when time difference is 1
-rough_deriv_bact+=[rough_deriv_bact[50]]     #since we only have 51 differences in a 52 sized array
+rough_deriv_bact+=[rough_deriv_bact[50]]     #since we only have 51 differences in a 52 sized array, but fortunately it is close to 1 on average for 20-41, so good enough for our guess
 K_guess_list = [(data[i][1] * g_max_guess * nutrient_amount[i] / (data[i][1] * mu_guess + rough_deriv_bact[i]) - nutrient_amount[i]) for i in np.arange(32,41)]
 
 K_guess = np.average(K_guess_list)          #veeeery rough estimate, see report
@@ -98,8 +98,8 @@ modellag = ((odeint(bacterialag, init_val, np.arange(0,4.5), args=(g_final, K_fi
 modelgrow = ((odeint(bacteria, modellag[4], np.arange(4.50001,150), args=(g_final, K_final, a_final, mu_final)))) #asked for 150 hour model - growth time
 model = np.vstack([modellag, modelgrow])
 plt.semilogy(np.hstack([np.arange(0,4.5), np.arange(4.50001,150)]), model[:,0], 'o', label='ODEINT')
-plt.ylabel('CFU / ml')                                  #put axis titles on graph
-plt.xlabel('Time (h) (Log)')
+plt.ylabel('CFU / ml (Log)')                                  #put axis titles on graph
+plt.xlabel('Time (h) ')
 plt.legend(loc='best')
 plt.title('Model for 150 hours using odeint')
 
